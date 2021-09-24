@@ -66,6 +66,7 @@ function! SwapWithFloatingWindow()
                 call nvim_set_current_win(g:windowtabs[l:ui_window_id][0]['win'])
                 " get the current view
                 :execute ":mkview 9"
+                let l:newlinenum = InsertView()['line_num']
                 let l:buf2 = bufnr()
                 let l:newvuew = g:windowtabs[l:ui_window_id][0]['view']
 
@@ -79,6 +80,6 @@ function! SwapWithFloatingWindow()
                 " set the line numbers
                 :execute "normal! ".l:newvuew['topline']."gg"
                 :execute "normal! zt"
-                :execute "normal! ".l:newvuew['line_num']."gg"
+                :execute "normal! ".l:newlinenum."gg"
         endif
 endfun
