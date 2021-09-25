@@ -36,7 +36,7 @@ function! MakeFloatingWindow()
 
     let l:startview = InsertView()
     let l:winwidth = winwidth(0)
-    let l:opts = {'relative': 'win', 'width': 10, 'height': 10,
+    let l:opts = {'relative': 'win', 'width': 30, 'height': 20,
                             \'col': l:winwidth, 'row': 0,
                             \ 'anchor': 'NE',
                             \ 'border':"single",
@@ -88,11 +88,7 @@ function! SwapWithFloatingWindow()
                 wincmd p
                 :execute ":b ".l:buf2
                 :execute ":loadview 9"
-                " set the line numbers
-
                 call sign_jump(l:newvuew['topline'], 'tabwin_top_marker_group','')
-                " :execute "normal! ".l:newvuew['topline']."gg"
-
                 :execute "normal! zt"
                 :execute "normal! ".l:newlinenum."gg"
         endif
