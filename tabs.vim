@@ -1,3 +1,7 @@
+" define sign
+
+call sign_define('tabwin_top_marker', {"text" : "w",})
+
 function! PositionFloatingWindows()
         " echo g:windowtabs
         if has_key(g:windowtabs, win_getid())
@@ -15,10 +19,21 @@ function InsertView()
         " get the top line and cursor line
 	let l:line_num = getcurpos()[1]
         let l:topline = getwininfo(win_getid())[0]['topline']
-        return { 'line_num': l:line_num, 'topline': l:topline }
+        " create a sign at the top line
+
+        let g:winSignId = g:winSignId + 1
+        let l:thisSignId = sign_place(g:winSignId, 'tabwin_top_marker_group', 'tabwin_top_marker', bufname(bufnr()), {'lnum':l:topline, 'priority':12})
+
+        return { 'line_num': l:line_num, 'topline': l:thisSignId }
 endfun
 
 function! MakeFloatingWindow()
+
+    if !exists('g:windowtabs')
+            let g:winSignId = 0
+            let g:windowtabs = {}
+    endif
+
     let l:startview = InsertView()
     let l:winwidth = winwidth(0)
     let l:opts = {'relative': 'win', 'width': 10, 'height': 10,
@@ -28,10 +43,6 @@ function! MakeFloatingWindow()
                             \ 'zindex': 1,
                             \'focusable': 0} " disables focue with c-w-w
     let l:win = nvim_open_win(0, 0, l:opts)
-
-    if !exists('g:windowtabs')
-            let g:windowtabs = {}
-    endif
 
     " create list of floating windows for this window if it doesn't exist
     if !exists(has_key(g:windowtabs, win_getid()))
@@ -78,7 +89,10 @@ function! SwapWithFloatingWindow()
                 :execute ":b ".l:buf2
                 :execute ":loadview 9"
                 " set the line numbers
-                :execute "normal! ".l:newvuew['topline']."gg"
+
+                call sign_jump(l:newvuew['topline'], 'tabwin_top_marker_group','')
+                " :execute "normal! ".l:newvuew['topline']."gg"
+
                 :execute "normal! zt"
                 :execute "normal! ".l:newlinenum."gg"
         endif
