@@ -23,7 +23,7 @@ function! UpdateTabInfo(window)
                 let l:lnumcur = getcurpos()[1]
                 wincmd p
                 " get line number also
-                let l:tabbuffercontents += [fnamemodify(l:buffer_name.":".l:lnumcur, ":t")]
+                let l:tabbuffercontents += [" ".fnamemodify(l:buffer_name.":".l:lnumcur, ":t")]
             endif
 
             let i = i + 1
