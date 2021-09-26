@@ -6,7 +6,7 @@ function! PositionFloatingWindows()
         " echo g:windowtabs
         if has_key(g:windowtabs, win_getid())
                 " position the tabs
-                for win in g:windowtabs[win_getid()]
+                for win in g:windowtabs[win_getid()]['views']
                         let l:winwidth = winwidth(0)
                         call nvim_win_set_config(win['win'], { 'relative':'win',
                                                 \'row':0, 'col':l:winwidth })
@@ -27,13 +27,21 @@ function InsertView()
         return { 'line_num': l:line_num, 'topline': l:thisSignId }
 endfun
 
-function! MakeFloatingWindow()
+function! InitializeTabWindows()
 
     if !exists('g:windowtabs')
             let g:winSignId = 0
             let g:windowtabs = {}
     endif
 
+    augroup windowtabsautocmds
+            autocmd!
+    augroup END
+    :augroup windowtabsautocmds | au CursorHold *  call PositionFloatingWindows()
+
+endfun
+
+function! MakeFloatingWindow()
     let l:startview = InsertView()
     let l:winwidth = winwidth(0)
     let l:opts = {'relative': 'win', 'width': 30, 'height': 20,
@@ -45,26 +53,16 @@ function! MakeFloatingWindow()
     let l:win = nvim_open_win(0, 0, l:opts)
 
     " create list of floating windows for this window if it doesn't exist
-    if !exists(has_key(g:windowtabs, win_getid()))
-        let g:windowtabs[win_getid()] = []
+    if !(has_key(g:windowtabs, win_getid()))
+        let g:windowtabs[win_getid()] = {'views':[]}
+        " create tab view window
     endif
-    let g:windowtabs[win_getid()] += [{ 'win':l:win, 'view':l:startview }]
 
-    augroup windowtabsautocmds
-            autocmd!
-    augroup END
-    :augroup windowtabsautocmds | au CursorHold *  call PositionFloatingWindows()
-
-    " if !exists('g:windowtabs_autocmd_defined')
-    "         let g:windowtabs_autocmd_defined = 1
-    "         :augroup windowtabsautocmds | au CursorHold *  call PositionFloatingWindows()
-    " endif
-
-    " set the location of the window
+    let g:windowtabs[win_getid()]['views'] += [{ 'win':l:win, 'view':l:startview }]
 
 endfun
 
-function! SwapWithFloatingWindow()
+function! SwapWithFloatingWindow(index)
         " select the floating window
         if has_key(g:windowtabs, win_getid())
                 let l:ui_window_id = win_getid()
@@ -74,16 +72,16 @@ function! SwapWithFloatingWindow()
                 let l:curview = InsertView()
 
                 " activate the tab window
-                call nvim_set_current_win(g:windowtabs[l:ui_window_id][0]['win'])
+                call nvim_set_current_win(g:windowtabs[l:ui_window_id]['views'][a:index]['win'])
                 " get the current view
                 :execute ":mkview 9"
                 let l:newlinenum = getcurpos()[1]
                 let l:buf2 = bufnr()
-                let l:newvuew = g:windowtabs[l:ui_window_id][0]['view']
+                let l:newvuew = g:windowtabs[l:ui_window_id]['views'][a:index]['view']
 
                 :execute ":b ".l:buf1
                 :execute ":loadview 8"
-                let g:windowtabs[l:ui_window_id][0]['view'] = l:curview
+                let g:windowtabs[l:ui_window_id]['views'][a:index]['view'] = l:curview
 
                 wincmd p
                 :execute ":b ".l:buf2
