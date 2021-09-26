@@ -5,9 +5,19 @@ call sign_define('tabwin_top_marker', {"text" : "w",})
 function! UpdateTabInfo(window)
     " count all the tab views present in this window
     if has_key(g:windowtabs, a:window)
-        let tabbuffercontents = []
-        for win in g:windowtabs[win_getid()]['views']
+        let l:tabbuffercontents = []
+
+        let i = 0
+        while i < len(g:windowtabs[win_getid()]['views'])
+            if i == g:windowtabs[win_getid()]['tabdisplay']['index']
+                let l:buffer_name = bufname(getwininfo(win_getid())[0]['bufnr'])
+                let l:lnumcur = getcurpos()[1]
+                let l:tabbuffercontents += [fnamemodify(l:buffer_name.":".l:lnumcur, ":t")]
+            endif
+
+            let win = g:windowtabs[win_getid()]['views'][i]
             " echom bufname(getwininfo(win['win'])[0]['bufnr'])
+
             let l:buffer_name = bufname(getwininfo(win['win'])[0]['bufnr'])
             " switch to window and check line number
             call nvim_set_current_win(win['win'])
@@ -15,6 +25,10 @@ function! UpdateTabInfo(window)
             wincmd p
             " get line number also
             let l:tabbuffercontents += [fnamemodify(l:buffer_name.":".l:lnumcur, ":t")]
+            let i = i + 1
+        endwhile
+
+        for win in g:windowtabs[win_getid()]['views']
         endfor
         call nvim_buf_set_lines(g:windowtabs[a:window]['tabdisplay']['buf'],
                     \0, -1, v:true, l:tabbuffercontents)
@@ -25,6 +39,7 @@ function! PositionFloatingWindows()
         " echo g:windowtabs
         if has_key(g:windowtabs, win_getid())
                 " position the tabs
+                call UpdateTabInfo(win_getid())
                 for win in g:windowtabs[win_getid()]['views']
                         let l:winwidth = winwidth(0)
                         call nvim_win_set_config(win['win'], { 'relative':'win',
@@ -86,7 +101,7 @@ function! MakeFloatingWindow()
         let tabdrawwin = nvim_open_win(tabdrawbuf, 0, tabdrawopts)
         " optional: change highlight, otherwise Pmenu is used
         " call nvim_win_set_option(tabdrawwin, 'winhl', 'Normal:MyHighlight')
-        let g:windowtabs[win_getid()] = {'views':[], 'tabdisplay':{'win':tabdrawwin, 'buf':tabdrawbuf}}
+        let g:windowtabs[win_getid()] = {'views':[], 'tabdisplay':{'win':tabdrawwin, 'buf':tabdrawbuf, 'index':0}}
         " create tab view window
     endif
 
