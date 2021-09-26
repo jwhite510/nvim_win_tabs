@@ -11,6 +11,10 @@ function! PositionFloatingWindows()
                         call nvim_win_set_config(win['win'], { 'relative':'win',
                                                 \'row':0, 'col':l:winwidth })
                 endfor
+                call nvim_win_set_config(g:windowtabs[win_getid()]['tabdisplay']['win'], { 'relative':'win',
+                                        \'row':0, 'col':l:winwidth })
+
+
         endif
 
 endfun
@@ -54,7 +58,15 @@ function! MakeFloatingWindow()
 
     " create list of floating windows for this window if it doesn't exist
     if !(has_key(g:windowtabs, win_getid()))
-        let g:windowtabs[win_getid()] = {'views':[]}
+
+        let tabdrawbuf = nvim_create_buf(v:false, v:true)
+        call nvim_buf_set_lines(tabdrawbuf, 0, -1, v:true, ["test", "text"])
+        let tabdrawopts = {'relative': 'win', 'width': 30, 'height': 20, 'col': l:winwidth,
+            \ 'row': 0, 'anchor': 'NE', 'style': 'minimal'}
+        let tabdrawwin = nvim_open_win(tabdrawbuf, 0, tabdrawopts)
+        " optional: change highlight, otherwise Pmenu is used
+        " call nvim_win_set_option(tabdrawwin, 'winhl', 'Normal:MyHighlight')
+        let g:windowtabs[win_getid()] = {'views':[], 'tabdisplay':{'win':tabdrawwin, 'buf':tabdrawbuf}}
         " create tab view window
     endif
 
