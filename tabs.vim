@@ -77,7 +77,7 @@ function! SwapWithFloatingWindow()
                 call nvim_set_current_win(g:windowtabs[l:ui_window_id][0]['win'])
                 " get the current view
                 :execute ":mkview 9"
-                let l:newlinenum = InsertView()['line_num']
+                let l:newlinenum = getcurpos()[1]
                 let l:buf2 = bufnr()
                 let l:newvuew = g:windowtabs[l:ui_window_id][0]['view']
 
@@ -89,6 +89,8 @@ function! SwapWithFloatingWindow()
                 :execute ":b ".l:buf2
                 :execute ":loadview 9"
                 call sign_jump(l:newvuew['topline'], 'tabwin_top_marker_group','')
+                call sign_unplace('tabwin_top_marker_group', { 'id':l:newvuew['topline'] })
+                " remove the sign
                 :execute "normal! zt"
                 :execute "normal! ".l:newlinenum."gg"
         endif
