@@ -7,10 +7,17 @@ function! UpdateTabInfo(window)
     if has_key(g:windowtabs, a:window)
         let tabbuffercontents = []
         for win in g:windowtabs[win_getid()]['views']
-            let tabbuffercontents += ["line"]
+            " echom bufname(getwininfo(win['win'])[0]['bufnr'])
+            let l:buffer_name = bufname(getwininfo(win['win'])[0]['bufnr'])
+            " switch to window and check line number
+            call nvim_set_current_win(win['win'])
+            let l:lnumcur = getcurpos()[1]
+            wincmd p
+            " get line number also
+            let l:tabbuffercontents += [fnamemodify(l:buffer_name.":".l:lnumcur, ":t")]
         endfor
         call nvim_buf_set_lines(g:windowtabs[a:window]['tabdisplay']['buf'],
-                    \0, -1, v:true, tabbuffercontents)
+                    \0, -1, v:true, l:tabbuffercontents)
     endif
 endfun
 
