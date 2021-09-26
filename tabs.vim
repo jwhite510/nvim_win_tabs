@@ -2,6 +2,18 @@
 
 call sign_define('tabwin_top_marker', {"text" : "w",})
 
+function! UpdateTabInfo(window)
+    " count all the tab views present in this window
+    if has_key(g:windowtabs, a:window)
+        let tabbuffercontents = []
+        for win in g:windowtabs[win_getid()]['views']
+            let tabbuffercontents += ["line"]
+        endfor
+        call nvim_buf_set_lines(g:windowtabs[a:window]['tabdisplay']['buf'],
+                    \0, -1, v:true, tabbuffercontents)
+    endif
+endfun
+
 function! PositionFloatingWindows()
         " echo g:windowtabs
         if has_key(g:windowtabs, win_getid())
@@ -61,6 +73,7 @@ function! MakeFloatingWindow()
 
         let tabdrawbuf = nvim_create_buf(v:false, v:true)
         call nvim_buf_set_lines(tabdrawbuf, 0, -1, v:true, ["test", "text"])
+
         let tabdrawopts = {'relative': 'win', 'width': 30, 'height': 20, 'col': l:winwidth,
             \ 'row': 0, 'anchor': 'NE', 'style': 'minimal'}
         let tabdrawwin = nvim_open_win(tabdrawbuf, 0, tabdrawopts)
@@ -71,6 +84,7 @@ function! MakeFloatingWindow()
     endif
 
     let g:windowtabs[win_getid()]['views'] += [{ 'win':l:win, 'view':l:startview }]
+    call UpdateTabInfo(win_getid())
 
 endfun
 
@@ -103,5 +117,6 @@ function! SwapWithFloatingWindow(index)
                 " remove the sign
                 :execute "normal! zt"
                 :execute "normal! ".l:newlinenum."gg"
+                call UpdateTabInfo(l:ui_window_id)
         endif
 endfun
