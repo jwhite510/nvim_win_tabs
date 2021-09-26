@@ -8,23 +8,24 @@ function! UpdateTabInfo(window)
         let l:tabbuffercontents = []
 
         let i = 0
-        while i < len(g:windowtabs[win_getid()]['views'])
+        while i <= len(g:windowtabs[win_getid()]['views'])
             if i == g:windowtabs[win_getid()]['tabdisplay']['index']
                 let l:buffer_name = bufname(getwininfo(win_getid())[0]['bufnr'])
                 let l:lnumcur = getcurpos()[1]
+                let l:tabbuffercontents += ["*".fnamemodify(l:buffer_name.":".l:lnumcur, ":t")]
+            endif
+            if i < len(g:windowtabs[win_getid()]['views'])
+                let win = g:windowtabs[win_getid()]['views'][i]
+
+                let l:buffer_name = bufname(getwininfo(win['win'])[0]['bufnr'])
+                " switch to window and check line number
+                call nvim_set_current_win(win['win'])
+                let l:lnumcur = getcurpos()[1]
+                wincmd p
+                " get line number also
                 let l:tabbuffercontents += [fnamemodify(l:buffer_name.":".l:lnumcur, ":t")]
             endif
 
-            let win = g:windowtabs[win_getid()]['views'][i]
-            " echom bufname(getwininfo(win['win'])[0]['bufnr'])
-
-            let l:buffer_name = bufname(getwininfo(win['win'])[0]['bufnr'])
-            " switch to window and check line number
-            call nvim_set_current_win(win['win'])
-            let l:lnumcur = getcurpos()[1]
-            wincmd p
-            " get line number also
-            let l:tabbuffercontents += [fnamemodify(l:buffer_name.":".l:lnumcur, ":t")]
             let i = i + 1
         endwhile
 
@@ -139,6 +140,28 @@ function! SwapWithFloatingWindow(index)
                 " remove the sign
                 :execute "normal! zt"
                 :execute "normal! ".l:newlinenum."gg"
+
+                " update index
+                let curindex = g:windowtabs[l:ui_window_id]['tabdisplay']['index']
+                " echom "curindex: ".curindex
+                " echom "a:index: ".a:index
+                let newindex = (curindex == a:index) ? a:index + 1 : a:index
+                " echom "newindex: ".newindex
+                let g:windowtabs[l:ui_window_id]['tabdisplay']['index'] = newindex
+
                 call UpdateTabInfo(l:ui_window_id)
         endif
+endfun
+
+function! NextTab(direction)
+    if has_key(g:windowtabs, win_getid())
+        " get the current index
+        let curindex = g:windowtabs[win_getid()]['tabdisplay']['index']
+        if a:direction == 'up'
+            call SwapWithFloatingWindow(curindex - 1)
+        elseif a:direction == 'down'
+            call SwapWithFloatingWindow(curindex)
+        endif
+
+    endif
 endfun
