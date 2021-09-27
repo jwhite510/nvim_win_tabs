@@ -66,6 +66,11 @@ function InsertView()
         return { 'line_num': l:line_num, 'topline': l:thisSignId }
 endfun
 
+function QuitWindow()
+    echom "quit window autocmd called"
+    " if this is called, then clean up all the windows that were created from
+endfun
+
 function! InitializeTabWindows()
 
     if !exists('g:windowtabs')
@@ -77,6 +82,7 @@ function! InitializeTabWindows()
             autocmd!
     augroup END
     :augroup windowtabsautocmds | au CursorHold *  call PositionFloatingWindows()
+    :augroup windowtabsautocmds | au QuitPre *  call QuitWindow()
 
 endfun
 
@@ -97,7 +103,7 @@ function! MakeFloatingWindow()
         let tabdrawbuf = nvim_create_buf(v:false, v:true)
         call nvim_buf_set_lines(tabdrawbuf, 0, -1, v:true, ["test", "text"])
 
-        let tabdrawopts = {'relative': 'win', 'width': 30, 'height': 20, 'col': l:winwidth,
+        let tabdrawopts = {'relative': 'win', 'width': 20, 'height': 15, 'col': l:winwidth,
             \ 'row': 0, 'anchor': 'NE', 'style': 'minimal'}
         let tabdrawwin = nvim_open_win(tabdrawbuf, 0, tabdrawopts)
         " optional: change highlight, otherwise Pmenu is used
@@ -146,7 +152,7 @@ function! SwapWithFloatingWindow(index)
                 " echom "curindex: ".curindex
                 " echom "a:index: ".a:index
                 let newindex = (curindex == a:index) ? a:index + 1 : a:index
-                " echom "newindex: ".newindex
+                echom "newindex: ".newindex
                 let g:windowtabs[l:ui_window_id]['tabdisplay']['index'] = newindex
 
                 call UpdateTabInfo(l:ui_window_id)
@@ -159,8 +165,6 @@ function! NextTab(direction)
         let curindex = g:windowtabs[win_getid()]['tabdisplay']['index']
         " get the current length
         let curlength = len(g:windowtabs[win_getid()]['views'])
-        echom "curlength: ".curlength
-        echom "curindex: ".curindex
         if and(a:direction == 'up', curindex > 0)
             call SwapWithFloatingWindow(curindex - 1)
         elseif and(a:direction == 'down', curindex < curlength)
@@ -168,4 +172,41 @@ function! NextTab(direction)
         endif
 
     endif
+endfun
+
+function! QuitTab()
+    " delete one (win) tab
+
+    " " TODO debug this
+    " get the current index
+    let curindex = g:windowtabs[win_getid()]['tabdisplay']['index']
+
+    " close the window
+    let lastwin = win_getid()
+    call nvim_set_current_win(g:windowtabs[win_getid()]['views'][curindex - 1]['win'])
+    " quit the window
+    :execute ":q"
+    call nvim_set_current_win(lastwin)
+    " wincmd p
+
+    " remove cur index - 1
+    echom "removing view"
+    echom g:windowtabs[win_getid()]['views']
+
+    let g:windowtabs[win_getid()]['views'] = remove(g:windowtabs[win_getid()]['views'], curindex - 1)
+
+    echom "removed view"
+    echom g:windowtabs[win_getid()]['views']
+    call input('test')
+
+    " set new index
+    let g:windowtabs[win_getid()]['tabdisplay']['index'] = curindex - 1
+
+    " remove the marker
+
+    " remove from the list
+    " let g:windowtabs[win_getid()]['views'] += [{ 'win':l:win, 'view':l:startview }]
+    " call UpdateTabInfo(win_getid())
+
+    " set buffer to next available
 endfun
