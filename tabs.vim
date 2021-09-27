@@ -157,9 +157,13 @@ function! NextTab(direction)
     if has_key(g:windowtabs, win_getid())
         " get the current index
         let curindex = g:windowtabs[win_getid()]['tabdisplay']['index']
-        if a:direction == 'up'
+        " get the current length
+        let curlength = len(g:windowtabs[win_getid()]['views'])
+        echom "curlength: ".curlength
+        echom "curindex: ".curindex
+        if and(a:direction == 'up', curindex > 0)
             call SwapWithFloatingWindow(curindex - 1)
-        elseif a:direction == 'down'
+        elseif and(a:direction == 'down', curindex < curlength)
             call SwapWithFloatingWindow(curindex)
         endif
 
