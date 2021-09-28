@@ -2,7 +2,7 @@
 " list the currently placed signs:
 " :sign place group=tabwin_top_marker_group
 
-call sign_define('tabwin_top_marker', {"text" : "w",})
+call sign_define('tabwin_top_marker', {"text" : "",})
 
 function! UpdateTabInfo(window)
     " count all the tab views present in this window
@@ -97,11 +97,11 @@ endfun
 function! MakeFloatingWindow()
     let l:startview = InsertView()
     let l:winwidth = winwidth(0)
-    let l:opts = {'relative': 'win', 'width': 30, 'height': 20,
+    let l:opts = {'relative': 'win', 'width': 1, 'height': 1,
                             \'col': l:winwidth, 'row': 0,
                             \ 'anchor': 'NE',
-                            \ 'border':"single",
                             \ 'zindex': 1,
+                            \ 'style': 'minimal',
                             \'focusable': 0} " disables focue with c-w-w
     let l:win = nvim_open_win(0, 0, l:opts)
 
