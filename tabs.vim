@@ -188,6 +188,9 @@ function! QuitTab()
     call nvim_set_current_win(lastwin)
     :execute ":b ".l:bufnum
     :execute ":loadview 9"
+    let l:newvuew = g:windowtabs[win_getid()]['views'][deleteindex]['view']
+    call sign_jump(l:newvuew['topline'], 'tabwin_top_marker_group','')
+    call sign_unplace('tabwin_top_marker_group', { 'id':l:newvuew['topline'] })
 
     " close the window
     call nvim_set_current_win(g:windowtabs[win_getid()]['views'][deleteindex]['win'])
