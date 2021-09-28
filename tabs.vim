@@ -178,10 +178,11 @@ function! QuitTab()
     " delete one (win) tab
     " get the current index
     let curindex = g:windowtabs[win_getid()]['tabdisplay']['index']
+    let deleteindex = ( curindex == 0 ) ? curindex : curindex - 1
 
     let lastwin = win_getid()
     " set the view to the window that is about to be deleted
-    call nvim_set_current_win(g:windowtabs[win_getid()]['views'][curindex - 1]['win'])
+    call nvim_set_current_win(g:windowtabs[win_getid()]['views'][deleteindex]['win'])
     let l:bufnum = bufnr()
     :execute ":mkview 9"
     call nvim_set_current_win(lastwin)
@@ -189,17 +190,17 @@ function! QuitTab()
     :execute ":loadview 9"
 
     " close the window
-    call nvim_set_current_win(g:windowtabs[win_getid()]['views'][curindex - 1]['win'])
+    call nvim_set_current_win(g:windowtabs[win_getid()]['views'][deleteindex]['win'])
     " quit the window
     :execute ":q"
     call nvim_set_current_win(lastwin)
     " wincmd p
     "
-    call remove(g:windowtabs[win_getid()]['views'], curindex - 1)
+    call remove(g:windowtabs[win_getid()]['views'], deleteindex)
     " echom g:windowtabs
 
     " set new index
-    let g:windowtabs[win_getid()]['tabdisplay']['index'] = curindex - 1
+    let g:windowtabs[win_getid()]['tabdisplay']['index'] = deleteindex
 
     " remove the marker
 
