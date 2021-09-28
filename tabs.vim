@@ -41,8 +41,8 @@ function! PositionFloatingWindows()
         if has_key(g:windowtabs, win_getid())
                 " position the tabs
                 call UpdateTabInfo(win_getid())
+                let l:winwidth = winwidth(0)
                 for win in g:windowtabs[win_getid()]['views']
-                        let l:winwidth = winwidth(0)
                         call nvim_win_set_config(win['win'], { 'relative':'win',
                                                 \'row':0, 'col':l:winwidth })
                 endfor
@@ -203,6 +203,15 @@ function! QuitTab()
     let g:windowtabs[win_getid()]['tabdisplay']['index'] = deleteindex
 
     " remove the marker
+
+    if len(g:windowtabs[win_getid()]['views'] ) == 0
+        " remove the tabs window
+        call nvim_set_current_win(g:windowtabs[win_getid()]['tabdisplay']['win'])
+        :execute ":bd"
+        call nvim_set_current_win(lastwin)
+        " delete key from dictionary
+        unlet g:windowtabs[win_getid()]
+    endif
 
     " remove from the list
     call UpdateTabInfo(win_getid())
