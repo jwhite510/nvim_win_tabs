@@ -176,17 +176,19 @@ endfun
 
 function! QuitTab()
     " delete one (win) tab
-
-    " " TODO debug this
     " get the current index
     let curindex = g:windowtabs[win_getid()]['tabdisplay']['index']
 
-    " remove window from list of tab view windows
-    " echom "removing"
-    " echom g:windowtabs
+    let lastwin = win_getid()
+    " set the view to the window that is about to be deleted
+    call nvim_set_current_win(g:windowtabs[win_getid()]['views'][curindex - 1]['win'])
+    let l:bufnum = bufnr()
+    :execute ":mkview 9"
+    call nvim_set_current_win(lastwin)
+    :execute ":b ".l:bufnum
+    :execute ":loadview 9"
 
     " close the window
-    let lastwin = win_getid()
     call nvim_set_current_win(g:windowtabs[win_getid()]['views'][curindex - 1]['win'])
     " quit the window
     :execute ":q"
