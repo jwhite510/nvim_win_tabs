@@ -1,10 +1,17 @@
+
+if exists('g:autoload_nvimtabs')
+    finish
+endif
+
+let g:autoload_nvimtabs = 1
+
 " define sign
 " list the currently placed signs:
 " :sign place group=tabwin_top_marker_group
 
 call sign_define('tabwin_top_marker', {"text" : "",})
 
-function! UpdateTabInfo(window)
+function! NvimTabs#UpdateTabInfo(window)
     " count all the tab views present in this window
     if has_key(g:windowtabs, a:window)
         let l:tabbuffercontents = []
@@ -38,7 +45,7 @@ function! UpdateTabInfo(window)
     endif
 endfun
 
-function! PositionFloatingWindows()
+function! NvimTabs#PositionFloatingWindows()
         " echo g:windowtabs
         if has_key(g:windowtabs, win_getid())
                 " position the tabs
@@ -56,7 +63,7 @@ function! PositionFloatingWindows()
 
 endfun
 
-function InsertView()
+function NvimTabs#InsertView()
         " get the top line and cursor line
 	let l:line_num = getcurpos()[1]
         let l:topline = getwininfo(win_getid())[0]['topline']
@@ -68,18 +75,18 @@ function InsertView()
         return { 'line_num': l:line_num, 'topline': l:thisSignId }
 endfun
 
-function QuitWindow()
+function NvimTabs#QuitWindow()
     let chwinid = win_getid()
     if has_key(g:windowtabs, chwinid)
         while has_key(g:windowtabs, chwinid)
             call QuitTab()
         endwhile
     endif
-    echom "quit window autocmd called"
+    " echom "quit window autocmd called"
     " if this is called, then clean up all the windows that were created from
 endfun
 
-function! InitializeTabWindows()
+function! NvimTabs#InitializeTabWindows()
 
     if !exists('g:windowtabs')
             let g:winSignId = 0
@@ -94,7 +101,7 @@ function! InitializeTabWindows()
 
 endfun
 
-function! MakeFloatingWindow()
+function! NvimTabs#MakeFloatingWindow()
     let l:startview = InsertView()
     let l:winwidth = winwidth(0)
     let l:opts = {'relative': 'win', 'width': 1, 'height': 1,
@@ -125,7 +132,7 @@ function! MakeFloatingWindow()
 
 endfun
 
-function! SwapWithFloatingWindow(index)
+function! NvimTabs#SwapWithFloatingWindow(index)
         " select the floating window
         if has_key(g:windowtabs, win_getid())
                 let l:ui_window_id = win_getid()
@@ -160,14 +167,14 @@ function! SwapWithFloatingWindow(index)
                 " echom "curindex: ".curindex
                 " echom "a:index: ".a:index
                 let newindex = (curindex == a:index) ? a:index + 1 : a:index
-                echom "newindex: ".newindex
+                " echom "newindex: ".newindex
                 let g:windowtabs[l:ui_window_id]['tabdisplay']['index'] = newindex
 
                 call UpdateTabInfo(l:ui_window_id)
         endif
 endfun
 
-function! NextTab(direction)
+function! NvimTabs#NextTab(direction)
     if has_key(g:windowtabs, win_getid())
         " get the current index
         let curindex = g:windowtabs[win_getid()]['tabdisplay']['index']
@@ -182,7 +189,7 @@ function! NextTab(direction)
     endif
 endfun
 
-function! QuitTab()
+function! NvimTabs#QuitTab()
     " delete one (win) tab
     " get the current index
     let curindex = g:windowtabs[win_getid()]['tabdisplay']['index']
@@ -229,3 +236,10 @@ function! QuitTab()
 
     " set buffer to next available
 endfun
+
+call NvimTabs#InitializeTabWindows()
+
+command! nvim_tabs_newtab() call NvimTabs#MakeFloatingWindow()
+command! nvim_tabs_closetab() call NvimTabs#QuitTab()
+command! nvim_tabs_tabdown call NvimTabs#NextTab('down')
+command! nvim_tabs_tabup call NvimTabs#NextTab('up')
