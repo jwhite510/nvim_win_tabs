@@ -1,4 +1,6 @@
 " define sign
+" list the currently placed signs:
+" :sign place group=tabwin_top_marker_group
 
 call sign_define('tabwin_top_marker', {"text" : "w",})
 
@@ -67,6 +69,12 @@ function InsertView()
 endfun
 
 function QuitWindow()
+    let chwinid = win_getid()
+    if has_key(g:windowtabs, chwinid)
+        while has_key(g:windowtabs, chwinid)
+            call QuitTab()
+        endwhile
+    endif
     echom "quit window autocmd called"
     " if this is called, then clean up all the windows that were created from
 endfun
