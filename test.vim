@@ -10,4 +10,14 @@ function MakeSign()
         normal! 3gg
 endfun
 
-call MakeSign()
+" call MakeSign()
+source tabs.vim
+call InitializeTabWindows()
+call MakeFloatingWindow()
+normal! j
+call MakeFloatingWindow()
+normal! j
+call MakeFloatingWindow()
+call NextTab('down')
+call QuitTab()
+call PositionFloatingWindows()
