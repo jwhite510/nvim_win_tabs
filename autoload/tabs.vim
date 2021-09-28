@@ -239,7 +239,7 @@ endfun
 
 call NvimTabs#InitializeTabWindows()
 
-command! nvim_tabs_newtab() call NvimTabs#MakeFloatingWindow()
-command! nvim_tabs_closetab() call NvimTabs#QuitTab()
+command! nvim_tabs_newtab call NvimTabs#MakeFloatingWindow()
+command! nvim_tabs_closetab call NvimTabs#QuitTab()
 command! nvim_tabs_tabdown call NvimTabs#NextTab('down')
 command! nvim_tabs_tabup call NvimTabs#NextTab('up')
