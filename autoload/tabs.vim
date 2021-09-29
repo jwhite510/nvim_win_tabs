@@ -108,7 +108,6 @@ function! NvimTabs#MakeFloatingWindow()
                             \'col': l:winwidth, 'row': 0,
                             \ 'anchor': 'NE',
                             \ 'zindex': 1,
-                            \ 'style': 'minimal',
                             \'focusable': 0} " disables focue with c-w-w
     let l:win = nvim_open_win(0, 0, l:opts)
 
