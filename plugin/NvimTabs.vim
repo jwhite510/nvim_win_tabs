@@ -11,9 +11,24 @@ let g:autoload_nvimtabs = 1
 
 call sign_define('tabwin_top_marker', {"text" : "",})
 
+function! NvimTabs#GetTrueLastWin()
+    wincmd p
+    let l:true_last_win = win_getid()
+    wincmd p
+    return l:true_last_win
+endfun
+
+function! NvimTabs#SetTrueLastWin(win)
+    call nvim_set_current_win(a:win)
+    wincmd p
+endfun
+
+
+
 function! NvimTabs#UpdateTabInfo(window)
     " count all the tab views present in this window
     if has_key(g:windowtabs, a:window)
+        let l:true_last_win = NvimTabs#GetTrueLastWin()
         let l:winwidth = winwidth(0)
         let l:tabbuffercontents = []
         let l:width = 0
@@ -53,6 +68,7 @@ function! NvimTabs#UpdateTabInfo(window)
                                 \'row':0, 'col':l:winwidth,
                                 \'width': l:width, 'height': len(l:tabbuffercontents) })
 
+        call NvimTabs#SetTrueLastWin(l:true_last_win)
     endif
 endfun
 
@@ -144,6 +160,7 @@ endfun
 function! NvimTabs#SwapWithFloatingWindow(index)
         " select the floating window
         if has_key(g:windowtabs, win_getid())
+                let l:true_last_win = NvimTabs#GetTrueLastWin()
                 let l:ui_window_id = win_getid()
                 " set this window to the active window
                 let l:buf1 = bufnr()
@@ -181,6 +198,7 @@ function! NvimTabs#SwapWithFloatingWindow(index)
                 let g:windowtabs[l:ui_window_id]['tabdisplay']['index'] = newindex
 
                 call NvimTabs#UpdateTabInfo(l:ui_window_id)
+                call NvimTabs#SetTrueLastWin(l:true_last_win)
         endif
 endfun
 
@@ -200,6 +218,7 @@ function! NvimTabs#NextTab(direction)
 endfun
 
 function! NvimTabs#QuitTab()
+    let l:true_last_win = NvimTabs#GetTrueLastWin()
     " delete one (win) tab
     " get the current index
     let curindex = g:windowtabs[win_getid()]['tabdisplay']['index']
@@ -246,6 +265,7 @@ function! NvimTabs#QuitTab()
 
     " remove from the list
     call NvimTabs#UpdateTabInfo(win_getid())
+    call NvimTabs#SetTrueLastWin(l:true_last_win)
 
     " set buffer to next available
 endfun
