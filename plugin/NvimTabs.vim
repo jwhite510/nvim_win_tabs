@@ -66,13 +66,14 @@ endfun
 function NvimTabs#InsertView()
         " get the top line and cursor line
 	let l:line_num = getcurpos()[1]
+	let l:line_col = getcurpos()[2]
         let l:topline = getwininfo(win_getid())[0]['topline']
         " create a sign at the top line
 
         let g:winSignId = g:winSignId + 1
         let l:thisSignId = sign_place(g:winSignId, 'tabwin_top_marker_group', 'tabwin_top_marker', bufname(bufnr()), {'lnum':l:topline, 'priority':12})
 
-        return { 'line_num': l:line_num, 'topline': l:thisSignId }
+        return { 'line_num': l:line_num, 'topline': l:thisSignId, 'line_col': l:line_col }
 endfun
 
 function NvimTabs#QuitWindow()
@@ -159,7 +160,8 @@ function! NvimTabs#SwapWithFloatingWindow(index)
                 call sign_unplace('tabwin_top_marker_group', { 'id':l:newvuew['topline'] })
                 " remove the sign
                 :execute "normal! zt"
-                :execute "normal! ".l:newlinenum."gg"
+                call setpos('.', [bufnr(), l:newlinenum, l:newvuew['line_col']])
+                " :execute "normal! ".l:newlinenum."gg"
 
                 " update index
                 let curindex = g:windowtabs[l:ui_window_id]['tabdisplay']['index']
