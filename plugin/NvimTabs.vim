@@ -201,12 +201,15 @@ function! NvimTabs#QuitTab()
     call nvim_set_current_win(g:windowtabs[win_getid()]['views'][deleteindex]['win'])
     let l:bufnum = bufnr()
     :execute ":mkview 9"
+    let l:newlinenum = getcurpos()[1]
     call nvim_set_current_win(lastwin)
     :execute ":b ".l:bufnum
     :execute ":loadview 9"
     let l:newvuew = g:windowtabs[win_getid()]['views'][deleteindex]['view']
     call sign_jump(l:newvuew['topline'], 'tabwin_top_marker_group','')
     call sign_unplace('tabwin_top_marker_group', { 'id':l:newvuew['topline'] })
+    :execute "normal! zt"
+    call setpos('.', [bufnr(), l:newlinenum, l:newvuew['line_col']])
 
     " close the window
     call nvim_set_current_win(g:windowtabs[win_getid()]['views'][deleteindex]['win'])
