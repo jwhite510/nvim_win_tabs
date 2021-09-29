@@ -15,12 +15,14 @@ function! NvimTabs#GetTrueLastWin()
     wincmd p
     let l:true_last_win = win_getid()
     wincmd p
-    return l:true_last_win
+    return ( l:true_last_win == win_getid() ) ? -1 : l:true_last_win
 endfun
 
 function! NvimTabs#SetTrueLastWin(win)
-    call nvim_set_current_win(a:win)
-    wincmd p
+    if a:win != -1
+        call nvim_set_current_win(a:win)
+        wincmd p
+    endif
 endfun
 
 
