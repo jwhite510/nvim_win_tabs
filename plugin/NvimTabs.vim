@@ -14,7 +14,9 @@ call sign_define('tabwin_top_marker', {"text" : "",})
 function! NvimTabs#UpdateTabInfo(window)
     " count all the tab views present in this window
     if has_key(g:windowtabs, a:window)
+        let l:winwidth = winwidth(0)
         let l:tabbuffercontents = []
+        let l:width = 0
 
         let i = 0
         while i <= len(g:windowtabs[win_getid()]['views'])
@@ -22,6 +24,8 @@ function! NvimTabs#UpdateTabInfo(window)
                 let l:buffer_name = bufname(getwininfo(win_getid())[0]['bufnr'])
                 let l:lnumcur = getcurpos()[1]
                 let l:tabbuffercontents += ["*".fnamemodify(l:buffer_name.":".l:lnumcur, ":t")]
+                let l:width = max([l:width, len(l:tabbuffercontents[-1])])
+
             endif
             if i < len(g:windowtabs[win_getid()]['views'])
                 let win = g:windowtabs[win_getid()]['views'][i]
@@ -33,6 +37,8 @@ function! NvimTabs#UpdateTabInfo(window)
                 wincmd p
                 " get line number also
                 let l:tabbuffercontents += [" ".fnamemodify(l:buffer_name.":".l:lnumcur, ":t")]
+                let l:width = max([l:width, len(l:tabbuffercontents[-1])])
+
             endif
 
             let i = i + 1
@@ -42,6 +48,11 @@ function! NvimTabs#UpdateTabInfo(window)
         endfor
         call nvim_buf_set_lines(g:windowtabs[a:window]['tabdisplay']['buf'],
                     \0, -1, v:true, l:tabbuffercontents)
+        " set the height of the buffer
+        call nvim_win_set_config(g:windowtabs[a:window]['tabdisplay']['win'], { 'relative':'win',
+                                \'row':0, 'col':l:winwidth,
+                                \'width': l:width, 'height': len(l:tabbuffercontents) })
+
     endif
 endfun
 
@@ -55,8 +66,6 @@ function! NvimTabs#PositionFloatingWindows()
                         call nvim_win_set_config(win['win'], { 'relative':'win',
                                                 \'row':0, 'col':l:winwidth })
                 endfor
-                call nvim_win_set_config(g:windowtabs[win_getid()]['tabdisplay']['win'], { 'relative':'win',
-                                        \'row':0, 'col':l:winwidth })
 
 
         endif
